@@ -15,24 +15,24 @@ import java.util.UUID;
 @ToString(exclude = {"clienteId", "imovelId"})
 @EqualsAndHashCode(exclude = {"criadaEm", "atualizadaEm"})
 public class Proposta {
-
     private Long id;
 
     @Builder.Default
     private String numero = gerarNumero();
 
-    private Long clienteId;    // FK para Cliente
-    private Long imovelId;     // FK para Imovel
+    private Long clientId;
+    private Long imovelId;
 
-    private BigDecimal valorProposta;    // Valor oferecido pelo cliente
-    private BigDecimal valorEntrada;     // Valor da entrada
-    private Integer quantidadeParcelas;  // Número de parcelas para financiamento
+    private BigDecimal valorEntrada;
+    private BigDecimal valorProposta;
+    private Integer quantidadeParcelas;
 
     @Builder.Default
-    private String status = "PENDENTE";  // PENDENTE, APROVADA, REJEITADA, CANCELADA, EXPIRADA
 
-    private String observacoes;          // Observações do cliente
-    private String motivoRejeicao;       // Motivo se rejeitada
+    private StatusProposta status = StatusProposta.PENDENTE;
+
+    private String observacoes;
+    private String motivoRejeicao;
 
     @Builder.Default
     private LocalDateTime criadaEm = LocalDateTime.now();
@@ -41,70 +41,64 @@ public class Proposta {
     private LocalDateTime atualizadaEm = LocalDateTime.now();
 
     @Builder.Default
-    private LocalDateTime validaAte = LocalDateTime.now().plusDays(15); // Padrão: 15 dias
+    private LocalDateTime validaAte = LocalDateTime.now().plusDays(15);
 
-    // validação
+    //VALIDACAO
 
     public void validarConsistenciaInterna() {
-        if (valorProposta != null && valorProposta.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalStateException("Bug detectado: valor da proposta deve ser positivo");
+        // Só para detectar bugs/corrupção de dados, não regras de negócio
+        if (status == null) {
+            throw new IllegalStateException("Bug detectado: status não pode ser null");
         }
-
-        if (valorEntrada != null && valorEntrada.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalStateException("Bug detectado: entrada não pode ser negativa");
+        if (criadaEm == null) {
+            throw new IllegalStateException("Bug detectado: criadaEm não pode ser null");
         }
-
-        if (valorProposta != null && valorEntrada != null && valorEntrada.compareTo(valorProposta) > 0) {
-            throw new IllegalStateException("Bug detectado: entrada maior que valor da proposta");
+        if (atualizadaEm == null) {
+            throw new IllegalStateException("Bug detectado: atualizadaEm não pode ser null");
         }
-
-        if (quantidadeParcelas != null && quantidadeParcelas <= 0) {
-            throw new IllegalStateException("Bug detectado: parcelas deve ser positivo");
+        if (validaAte == null) {
+            throw new IllegalStateException("Bug detectado: validaAte não pode ser null");
         }
     }
 
-    // ===== MÉTODOS DE STATUS =====
-
-    public boolean isPendente() {
-        return "PENDENTE".equals(status);
+    public boolean isPendente(){
+        return status == StatusProposta.PENDENTE;
     }
 
-    public boolean isAprovada() {
-        return "APROVADA".equals(status);
+    public boolean isAprovada(){
+        return status == StatusProposta.APROVADA;
     }
 
-    public boolean isRejeitada() {
-        return "REJEITADA".equals(status);
+    public boolean isRejeitada(){
+        return status == StatusProposta.REJEITADA;
+    }
+    public boolean isCancelada(){
+        return status == StatusProposta.CANCELADA;
+    }
+    public boolean isExpirada(){
+        return status == StatusProposta.EXPIRADA || (isPendente() && validaAte.isBefore(LocalDateTime.now()));
     }
 
-    public boolean isCancelada() {
-        return "CANCELADA".equals(status);
-    }
-
-    public boolean isExpirada() {
-        return "EXPIRADA".equals(status) || (isPendente() && validaAte.isBefore(LocalDateTime.now()));
-    }
-
-    public boolean isValida() {
+    public boolean isValida(){
         return isPendente() && validaAte.isAfter(LocalDateTime.now());
     }
 
-    // NEGÓCIO
+    //NEGOCIO
 
-    public void aprovar() {
-        if (!isValida()) {
-            throw new IllegalStateException("Proposta não pode ser aprovada. Status: " + getStatusDetalhado());
+    public void aprovar(){
+        if(!isValida()){
+            throw new IllegalStateException("Proposta não aprovada. Status: " +getStatusDetalhado());
         }
-        this.status = "APROVADA";
+        this.status = StatusProposta.APROVADA;
         this.atualizadaEm = LocalDateTime.now();
     }
 
-    public void rejeitar(String motivo) {
-        if (!isPendente()) {
+    public void rejeitar(String motivo){
+        if(!isPendente()){
             throw new IllegalStateException("Apenas propostas pendentes podem ser rejeitadas");
         }
-        this.status = "REJEITADA";
         this.motivoRejeicao = motivo;
+        this.status = StatusProposta.REJEITADA;
         this.atualizadaEm = LocalDateTime.now();
     }
 
@@ -112,13 +106,13 @@ public class Proposta {
         if (!isPendente()) {
             throw new IllegalStateException("Apenas propostas pendentes podem ser canceladas");
         }
-        this.status = "CANCELADA";
+        this.status = StatusProposta.CANCELADA;
         this.atualizadaEm = LocalDateTime.now();
     }
 
-    public void marcarComoExpirada() {
-        if (isPendente() && validaAte.isBefore(LocalDateTime.now())) {
-            this.status = "EXPIRADA";
+    public void marcarComoExpirada(){
+        if(isPendente() && validaAte.isBefore(LocalDateTime.now())){
+            this.status = StatusProposta.EXPIRADA;
             this.atualizadaEm = LocalDateTime.now();
         }
     }
@@ -133,8 +127,6 @@ public class Proposta {
         this.validaAte = this.validaAte.plusDays(dias);
         this.atualizadaEm = LocalDateTime.now();
     }
-
-    // ===== CÁLCULOS FINANCEIROS =====
 
     public BigDecimal calcularValorFinanciado() {
         if (valorProposta == null || valorEntrada == null) {
@@ -186,17 +178,7 @@ public class Proposta {
         return BigDecimal.valueOf(valorParcela).setScale(2, RoundingMode.HALF_UP);
     }
 
-    public BigDecimal calcularTotalComJuros(double taxaJurosAnual) {
-        BigDecimal parcelaComJuros = calcularValorParcelaComJuros(taxaJurosAnual);
-        if (quantidadeParcelas == null || parcelaComJuros.compareTo(BigDecimal.ZERO) <= 0) {
-            return valorProposta != null ? valorProposta : BigDecimal.ZERO;
-        }
-
-        BigDecimal totalFinanciado = parcelaComJuros.multiply(BigDecimal.valueOf(quantidadeParcelas));
-        return totalFinanciado.add(valorEntrada != null ? valorEntrada : BigDecimal.ZERO);
-    }
-
-    // ===== MÉTODOS DE ATUALIZAÇÃO =====
+    //ATUALIZAÇÃO
 
     public void atualizarObservacoes(String novasObservacoes) {
         if (!isPendente()) {
@@ -206,7 +188,8 @@ public class Proposta {
         this.atualizadaEm = LocalDateTime.now();
     }
 
-    // ===== MÉTODOS DE FORMATAÇÃO/UTILIDADE =====
+
+    //FORMATAÇÃO
 
     public long getDiasRestantesValidade() {
         if (isExpirada()) {
@@ -219,7 +202,7 @@ public class Proposta {
         if (isExpirada() && isPendente()) {
             return "EXPIRADA (vencida em " + validaAte.toLocalDate() + ")";
         }
-        return status;
+        return status.name() + " - " + status.getDescricao();
     }
 
     public String getNumeroFormatado() {
@@ -244,9 +227,11 @@ public class Proposta {
         return sb.toString();
     }
 
-    // ===== MÉTODOS PRIVADOS =====
 
-    private static String gerarNumero() {
-        return "PROP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    //gerarUUIDPROP
+    private static String gerarNumero(){
+        return "PROP-"+UUID.randomUUID().toString().substring(0,8).toUpperCase();
     }
+
+
 }
