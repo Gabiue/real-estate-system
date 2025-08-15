@@ -28,6 +28,6 @@ public class CriarClienteRequest {
     private String telefone;
 
     @Size(max = 500, message = "O máximo é 500 caracteres")
-    private String observações;
+    private String observacoes;
 }
 
