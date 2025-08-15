@@ -58,4 +58,5 @@ public class ClienteMapper {
         }
         return cpfFormatado.replaceAll("[^0-9]", "");
     }
+
 }

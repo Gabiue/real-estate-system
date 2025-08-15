@@ -21,8 +21,6 @@ public class ImovelDTO {
 
         private BigDecimal preco;
 
-        private BigDecimal valorPorM2;
-
         private Integer quartos;
 
         private String descricao;
