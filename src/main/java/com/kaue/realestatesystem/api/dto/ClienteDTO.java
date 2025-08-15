@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class ClienteDTO {
     private Long id;
-    private String name;
+    private String nome;
     private String email;
     private LocalDate dataNascimento;
     private String telefone;
