@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ToString(exclude = "cpf")
 @EqualsAndHashCode(exclude = {"criadoEm", "atualizadoEm"})
 
-public class Client {
+public class Cliente {
     private Long id;
     private String nome;
     private String cpf;
