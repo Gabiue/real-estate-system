@@ -20,7 +20,7 @@ public class Proposta {
     @Builder.Default
     private String numero = gerarNumero();
 
-    private Long clientId;
+    private Long clienteId;
     private Long imovelId;
 
     private BigDecimal valorEntrada;
