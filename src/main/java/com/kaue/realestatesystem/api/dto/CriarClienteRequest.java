@@ -1,9 +1,11 @@
 package com.kaue.realestatesystem.api.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
+@Data
 public class CriarClienteRequest {
 
     @NotBlank(message = "Nome é obrigatório")

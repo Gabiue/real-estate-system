@@ -1,8 +1,12 @@
 package com.kaue.realestatesystem.api.dto;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+
+@Data
 public class ClienteDTO {
     private Long id;
     private String name;
