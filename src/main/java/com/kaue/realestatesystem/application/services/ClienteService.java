@@ -1,6 +1,5 @@
 package com.kaue.realestatesystem.application.services;
 
-import com.kaue.realestatesystem.api.controllers.ClienteController;
 import com.kaue.realestatesystem.api.dto.AtualizarClienteRequest;
 import com.kaue.realestatesystem.api.dto.ClienteDTO;
 import com.kaue.realestatesystem.api.dto.CriarClienteRequest;
@@ -16,14 +15,18 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
+
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
 
-    public ClienteDTO criarCliente(CriarClienteRequest request){
+    public ClienteDTO criarCliente(CriarClienteRequest request) {
+        // 1. Converter DTO para Entity
         Cliente cliente = clienteMapper.toEntity(request);
 
+        // 2. Salvar no repositório
         Cliente clienteSalvo = clienteRepository.salvar(cliente);
 
+        // 3. Converter Entity para DTO e retornar
         return clienteMapper.toDTO(clienteSalvo);
     }
 
@@ -34,7 +37,6 @@ public class ClienteService {
                 .map(clienteMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
 
     public ClienteDTO buscarPorId(Long id) {
         Cliente cliente = clienteRepository.buscarId(id)
@@ -50,16 +52,19 @@ public class ClienteService {
         return clienteMapper.toDTO(cliente);
     }
 
-    public ClienteDTO atualizarCliente(Long id, AtualizarClienteRequest request){
+    public ClienteDTO atualizarCliente(Long id, AtualizarClienteRequest request) {
+        // 1. Buscar cliente existente
         Cliente cliente = clienteRepository.buscarId(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
+        // 2. Aplicar mudanças usando o mapper
         clienteMapper.updateEntity(cliente, request);
 
+        // 3. Salvar alterações
         Cliente clienteAtualizado = clienteRepository.salvar(cliente);
 
+        // 4. Retornar DTO atualizado
         return clienteMapper.toDTO(clienteAtualizado);
-
     }
 
     public void deletarCliente(Long id) {

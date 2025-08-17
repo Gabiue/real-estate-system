@@ -15,9 +15,13 @@ public class ClienteMapper {
        if(request == null){
            return null;
        }
+       String cpfLimpo = request.getCpf();
+       if (cpfLimpo != null) {
+           cpfLimpo = cpfLimpo.replaceAll("[^0-9]", "");
+       }
        return Cliente.builder()
                .nome(request.getNome())
-               .cpf(request.getCpf())
+               .cpf(cpfLimpo)
                .email(request.getEmail())
                .telefone(request.getTelefone())
                .dataNascimento(request.getDataNascimento())
