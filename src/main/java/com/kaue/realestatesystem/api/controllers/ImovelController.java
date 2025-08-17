@@ -3,7 +3,9 @@ package com.kaue.realestatesystem.api.controllers;
 import com.kaue.realestatesystem.api.dto.AtualizarImovelRequest;
 import com.kaue.realestatesystem.api.dto.CriarImovelRequest;
 import com.kaue.realestatesystem.api.dto.ImovelDTO;
+import com.kaue.realestatesystem.application.services.ImovelService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +16,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/imoveis")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ImovelController {
+
+    private final ImovelService imovelService;
 
     @PostMapping
     public ResponseEntity<ImovelDTO> cadastrarImovel(@Valid @RequestBody CriarImovelRequest request){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-
+        return ResponseEntity.ok(imovelService.cadastrarImovel(request));
     }
 
     @GetMapping
@@ -30,57 +33,43 @@ public class ImovelController {
             @RequestParam(required = false) BigDecimal precoMax,
             @RequestParam(required = false) Integer quartos,
             @RequestParam(required = false) String status){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.listarImoveis(tipo, precoMin, precoMax, quartos, status));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ImovelDTO> buscarImovelPorId(@PathVariable Long id){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.buscarImovelPorId(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ImovelDTO> atualizarImovel(
             @PathVariable Long id,
             @Valid @RequestBody AtualizarImovelRequest request){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-
+        return ResponseEntity.ok(imovelService.atualizarImovel(id, request));
     }
 
-    //DELETAR IMOVEL
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarImovel(@PathVariable Long id){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        imovelService.deletarImovel(id);
+        return ResponseEntity.noContent().build();
     }
 
-    //BUSCAR IMOVEL POR CÓDIGO UNICO
     @GetMapping("/codigo/{codigo}")
     public ResponseEntity<ImovelDTO> buscarImovelPorCodigo(@PathVariable String codigo) {
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.buscarImovelPorCodigo(codigo));
     }
 
-
-    //LISTAR DISPONIVEIS
     @GetMapping("/disponiveis")
     public ResponseEntity<List<ImovelDTO>> listarImoveisDisponiveis() {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.listarImoveisDisponiveis());
     }
 
-
-    //ALTERAR STATUS
     @PutMapping("/{id}/status")
     public ResponseEntity<ImovelDTO> alterarStatusImovel(
             @PathVariable Long id,
             @RequestParam String acao) {
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.alterarStatusImovel(id, acao));
     }
-
-    //BUSCAR POR FAIXA DE PREÇO
 
     @GetMapping("/preco")
     public ResponseEntity<List<ImovelDTO>> buscarPorFaixaPreco(
@@ -91,9 +80,6 @@ public class ImovelController {
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(imovelService.buscarPorFaixaPreco(precoMin, precoMax));
     }
-
-
-
 }

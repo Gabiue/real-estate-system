@@ -3,7 +3,9 @@ package com.kaue.realestatesystem.api.controllers;
 import com.kaue.realestatesystem.api.dto.AtualizarClienteRequest;
 import com.kaue.realestatesystem.api.dto.ClienteDTO;
 import com.kaue.realestatesystem.api.dto.CriarClienteRequest;
+import com.kaue.realestatesystem.application.services.ClienteService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,62 +15,46 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/clientes")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ClienteController {
 
-    //CRIAR CLIENTE
+    private final ClienteService clienteService;
 
     @PostMapping
     public ResponseEntity<ClienteDTO> criarCliente(@Valid @RequestBody CriarClienteRequest request){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(clienteService.criarCliente(request));
     }
 
-    //LISTAR CLIENTES
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarClientes(){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(clienteService.listarTodos());
     }
-
-    //BUSCAR POR ID
 
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> buscarClientePorId(@PathVariable Long id){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(clienteService.buscarPorId(id));
     }
-
-    //ATUALIZAR CLIENTE EXISTENTE
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> atualizarCliente(
             @PathVariable Long id,
             @Valid @RequestBody AtualizarClienteRequest request){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(clienteService.atualizarCliente(id, request));
     }
 
-    //DELETAR CLIENTE
-
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarCliente(@PathVariable Long id){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        clienteService.deletarCliente(id);
+        return ResponseEntity.noContent().build();
     }
-
-    //BUSCAR CLIENTE POR CPF
 
     @GetMapping("/cpf/{cpf}")
     public ResponseEntity<ClienteDTO> buscarClientePorCpf(@PathVariable String cpf){
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(clienteService.buscarPorCpf(cpf));
     }
 
-    //VERIFICAR CPF EXISTENTE
-
-    @GetMapping
-    public ResponseEntity<Void> verificarCpfExiste(@PathVariable String cpf){
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    @GetMapping("/cpf/{cpf}/existe")
+    public ResponseEntity<Boolean> verificarCpfExiste(@PathVariable String cpf){
+        return ResponseEntity.ok(clienteService.verificarCpfExiste(cpf));
     }
-
 }
