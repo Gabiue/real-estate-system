@@ -22,14 +22,13 @@ public class CriarClienteRequest {
     private String email;
 
     @NotNull(message = "Data de nascimento é obrigatório")
-    @Past(message = "A data de nascimento não pode ser no passado")
+    @Past(message = "A data de nascimento deve ser no passado")
     private LocalDate dataNascimento;
 
     @NotNull(message = "Telefone é obrigatório")
-    @Pattern(regexp = "\\(\\{2}\\) \\d{4,5}-\\d{4}", message = "O formato deve serguir o padrão: (12) 00000-0000")
+    @Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "O formato deve seguir o padrão: (11) 99999-9999")
     private String telefone;
 
     @Size(max = 500, message = "O máximo é 500 caracteres")
     private String observacoes;
 }
-
